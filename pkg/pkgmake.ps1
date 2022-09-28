@@ -18,7 +18,7 @@ function _init {
     $global:app_pkgid = "clink"
     $global:app_displayname = "Clink"
     $global:app_version = Get-ChildItem $BASEDIR\..\ext\*.zip | % { $_.Name -replace "^[^.]+\.", "" -replace "\.[^.]+.zip$" , "" }
-    $global:app_revision = (git log --pretty=oneline).count
+    $global:app_revision = git rev-list --count HEAD
     $global:app_build = git rev-parse --short HEAD
 
     $global:app_pkgname = "$app_pkgid-$app_version-$app_revision-$app_build"
@@ -75,7 +75,7 @@ function nupkg {
 function checksums {
     "# checksums ..."
     cd PKG
-    get-filehash *.zip, *.nupkg, *.msi | select Hash, @{l = "File"; e = { split-path $_.Path -leaf } } | % { "$($_.Hash) $($_.File)" } | Out-File -Encoding "UTF8" $app_pkgname-checksums-sha256.txt
+    Get-FileHash *.zip, *.nupkg, *.msi | Select-Object Hash, @{l = "File"; e = { split-path $_.Path -leaf } } | % { "$($_.Hash) $($_.File)" } | Out-File -Encoding "UTF8" $app_pkgname-checksums-sha256.txt
     Get-Content $app_pkgname-checksums-sha256.txt
     cd ..
 }
@@ -95,9 +95,12 @@ if (! $funcs.contains($rule)) {
     exit 1
 }
 
+Push-Location
 cd "$BASEDIR"
 _init
 
 "##### Executing rule '$rule'"
 & $rule $args
 "##### done"
+
+Pop-Location
