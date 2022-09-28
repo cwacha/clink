@@ -17,7 +17,7 @@ function all {
 function _init {
     $global:app_pkgid = "clink"
     $global:app_displayname = "Clink"
-    $global:app_version = Get-ChildItem $BASEDIR\..\ext\*.zip | % { $_.Name -replace "^\w+.", "" -replace ".[0-9]+.zip$" , "" }
+    $global:app_version = Get-ChildItem $BASEDIR\..\ext\*.zip | % { $_.Name -replace "^[^.]+\.", "" -replace "\.[^.]+.zip$" , "" }
     $global:app_revision = (git log --pretty=oneline).count
     $global:app_build = git rev-parse --short HEAD
 
